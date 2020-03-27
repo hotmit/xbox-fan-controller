@@ -3,9 +3,9 @@
 #define FAN_PIN 9
 #define TEMP_PIN 5
 
-#define LED_RED 1
-#define LED_GREEN 0
-#define LED_BLUE 2
+#define LED_RED A2
+#define LED_GREEN A1
+#define LED_BLUE A3
 
 DS18B20 ds(TEMP_PIN);
 
@@ -53,13 +53,13 @@ void setup()
 void loop()
 {
   analogWrite25k(FAN_PIN, 180);
-  RGB_color(255, 255, 255);
-  
+//  RGB_color(0, 0, 50);
+
   while(1){
     delay(1000);
     ds.selectNext();
     Serial.println(ds.getTempC());
-    analogWrite25k(FAN_PIN, map(ds.getTempC(), 40, 60, 200, 320));    
+    analogWrite25k(FAN_PIN, map(ds.getTempC(), 30, 50, 200, 320));    
   }
 }
 
