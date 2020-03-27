@@ -53,13 +53,15 @@ void setup()
 void loop()
 {
   analogWrite25k(FAN_PIN, 180);
-//  RGB_color(0, 0, 50);
+  RGB_color(255, 255, 255);
 
   while(1){
     delay(1000);
     ds.selectNext();
     Serial.println(ds.getTempC());
-    analogWrite25k(FAN_PIN, map(ds.getTempC(), 30, 50, 200, 320));    
+
+    // 40C => cpu 52C, 45C => cpu 61C, 59C => cpu 80C
+    analogWrite25k(FAN_PIN, map(ds.getTempC(), 38, 60, 220, 320));    
   }
 }
 
