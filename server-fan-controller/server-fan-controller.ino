@@ -7,24 +7,12 @@
 #define LED_GREEN A1
 #define LED_BLUE A3
 
+#define MIN_FAN_SPEED 170
+
 DS18B20 ds(TEMP_PIN);
 
-// PWM output @ 25 kHz, only on pins 9 and 10.
-// Output value should be between 0 and 320, inclusive.
-void analogWrite25k(int pin, int value)
-{
-  switch (pin) {
-      case 9:
-          OCR1A = value;
-          break;
-      case 10:
-          OCR1B = value;
-          break;
-      default:
-          // no other pin will work
-          break;
-  }
-}
+float temperature = 0;
+float targetTempColor = 0;
 
 void setup()
 {
@@ -50,24 +38,54 @@ void setup()
   pinMode(LED_BLUE, OUTPUT);
 }
 
+
+
 void loop()
 {
-  analogWrite25k(FAN_PIN, 180);
-  RGB_color(255, 255, 255);
+  analogWrite25k(FAN_PIN, MIN_FAN_SPEED);
+  RGB_color(20, 20, 20);
 
   while(1){
     delay(1000);
     ds.selectNext();
-    Serial.println(ds.getTempC());
+    temperature = ds.getTempC();
+    
+    Serial.println(temperature);
 
     // 40C => cpu 52C, 45C => cpu 61C, 59C => cpu 80C
-    analogWrite25k(FAN_PIN, map(ds.getTempC(), 38, 60, 220, 320));    
+    analogWrite25k(FAN_PIN, map(temperature, 45, 60, MIN_FAN_SPEED, 320));    
+
+    if (targetTempColor == 0 || targetTempColor == temperature){
+      targetTempColor = temperature;
+    }
+    else {          
+      targetTempColor = (targetTempColor < temperature) ? targetTempColor + 0.1 : targetTempColor - 0.1;
+    }
+
+    RGB_color(map(targetTempColor, 45, 60, 0, 200), 20, 20);
   }
 }
 
-void RGB_color(int red_light_value, int green_light_value, int blue_light_value)
+void RGB_color(int red, int green, int blue)
  {
-  analogWrite(LED_RED, 255 - red_light_value);
-  analogWrite(LED_GREEN, 255 - green_light_value);
-  analogWrite(LED_BLUE, 255 - blue_light_value);
+  analogWrite(LED_RED, 255 - red);
+  analogWrite(LED_GREEN, 255 - green);
+  analogWrite(LED_BLUE, 255 - blue);
+}
+
+// PWM output @ 25 kHz, only on pins 9 and 10.
+// Output value should be between 0 and 320, inclusive.
+void analogWrite25k(int pin, int value)
+{
+  switch (pin) {
+      case 9:
+          OCR1A = value;
+          break;
+      case 10:
+          OCR1B = value;
+          break;
+      default:
+          // no other pin will work
+          break;
+  }
 }
